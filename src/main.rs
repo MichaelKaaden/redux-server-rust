@@ -1,20 +1,34 @@
+use std::collections::HashMap;
+use std::sync::Mutex;
+
 use actix_web::{get, web, App, HttpServer, Responder};
 
 struct AppInfo {
     version: String,
 }
 
+#[derive(Debug)]
+struct AppState {
+    counters: Mutex<HashMap<i32, i32>>, // Mutex is necessary to mutate safely across threads
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    let app_state = web::Data::new(AppState {
+        counters: Mutex::new(HashMap::new()),
+    });
+
+    HttpServer::new(move || {
         App::new()
+            .app_data(app_state.clone())
             .data(AppInfo {
                 version: { format!("v{}", built_info::PKG_VERSION) },
             })
             .service(version)
+            .service(counters)
             .service(
                 // prefixes all resources and routes attached to it...
-                web::scope("/counters")
+                web::scope("/demo")
                     // ...so this handles requests for "GET /app/index.html"
                     .route("/index.html", web::get().to(index)),
             )
@@ -31,6 +45,12 @@ async fn index() -> impl Responder {
 #[get("/version")]
 async fn version(data: web::Data<AppInfo>) -> impl Responder {
     format!("{}", &data.version)
+}
+
+#[get("/counters")]
+async fn counters(data: web::Data<AppState>) -> impl Responder {
+    let counters = data.counters.lock().unwrap();
+    format!("Number of counters: {}", counters.len())
 }
 
 // Use of a mod or pub mod is not actually necessary.
