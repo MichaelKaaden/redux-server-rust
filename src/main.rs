@@ -1,14 +1,23 @@
 use actix_web::{get, web, App, HttpServer, Responder};
 
+struct AppInfo {
+    version: String,
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
-        App::new().service(version).service(
-            // prefixes all resources and routes attached to it...
-            web::scope("/counters")
-                // ...so this handles requests for "GET /app/index.html"
-                .route("/index.html", web::get().to(index)),
-        )
+        App::new()
+            .data(AppInfo {
+                version: { format!("v{}", built_info::PKG_VERSION) },
+            })
+            .service(version)
+            .service(
+                // prefixes all resources and routes attached to it...
+                web::scope("/counters")
+                    // ...so this handles requests for "GET /app/index.html"
+                    .route("/index.html", web::get().to(index)),
+            )
     })
     .bind("127.0.0.1:3000")?
     .run()
@@ -20,8 +29,8 @@ async fn index() -> impl Responder {
 }
 
 #[get("/version")]
-async fn version() -> impl Responder {
-    format!("v{}", built_info::PKG_VERSION)
+async fn version(data: web::Data<AppInfo>) -> impl Responder {
+    format!("{}", &data.version)
 }
 
 // Use of a mod or pub mod is not actually necessary.
