@@ -10,13 +10,7 @@ struct AppInfo {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct AppState {
-    counters: Mutex<HashMap<i32, i32>>, // Mutex is necessary to mutate safely across threads
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Counter {
-    index: i32,
-    value: i32,
+    counters: Mutex<HashMap<u32, i32>>, // Mutex is necessary to mutate safely across threads
 }
 
 #[actix_web::main]
@@ -34,7 +28,7 @@ async fn main() -> std::io::Result<()> {
                 version: { format!("v{}", built_info::PKG_VERSION) },
             })
             .service(version)
-            .service(counters)
+            .service(get_counters)
             .service(
                 // prefixes all resources and routes attached to it...
                 web::scope("/demo")
@@ -57,14 +51,9 @@ async fn version(data: web::Data<AppInfo>) -> impl Responder {
 }
 
 #[get("/counters")]
-async fn counters(data: web::Data<AppState>) -> Result<HttpResponse> {
-    let counters = data.counters.lock().unwrap();
-    let initial_index = 0;
-    let initial_value = *counters.get(&initial_index).unwrap();
-    Ok(HttpResponse::Ok().json(vec![Counter {
-        index: initial_index,
-        value: initial_value,
-    }]))
+async fn get_counters(data: web::Data<AppState>) -> Result<HttpResponse> {
+    let counters = redux_server_rust::get_counters(data.counters.lock().unwrap());
+    Ok(HttpResponse::Ok().json(counters))
 }
 
 // Use of a mod or pub mod is not actually necessary.
