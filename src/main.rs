@@ -4,6 +4,8 @@ use std::sync::Mutex;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
 use serde::{Deserialize, Serialize};
 
+use redux_server_rust::Counter;
+
 struct AppInfo {
     version: String,
 }
@@ -11,6 +13,23 @@ struct AppInfo {
 #[derive(Debug, Serialize, Deserialize)]
 struct AppState {
     counters: Mutex<HashMap<u32, i32>>, // Mutex is necessary to mutate safely across threads
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct CounterDTO {
+    counter: Counter,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct CountersDTO {
+    counters: Vec<Counter>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct JSONResult<T> {
+    data: T,
+    message: String,
+    status: u32,
 }
 
 #[actix_web::main]
@@ -47,13 +66,19 @@ async fn index() -> impl Responder {
 
 #[get("/version")]
 async fn version(data: web::Data<AppInfo>) -> impl Responder {
-    format!("{}", &data.version)
+    data.version.to_string()
 }
 
 #[get("/counters")]
 async fn get_counters(data: web::Data<AppState>) -> Result<HttpResponse> {
     let counters = redux_server_rust::get_counters(data.counters.lock().unwrap());
-    Ok(HttpResponse::Ok().json(counters))
+    let counters_dto: CountersDTO = CountersDTO { counters };
+    let foo: JSONResult<CountersDTO> = JSONResult {
+        data: counters_dto,
+        message: "okay".to_string(),
+        status: 200,
+    };
+    Ok(HttpResponse::Ok().json(foo))
 }
 
 // Use of a mod or pub mod is not actually necessary.

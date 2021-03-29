@@ -10,11 +10,16 @@ pub struct Counter {
 }
 
 pub fn get_counters(counters: MutexGuard<HashMap<u32, i32>>) -> Vec<Counter> {
-    let initial_index: u32 = 0;
-    let initial_value = *counters.get(&initial_index).unwrap();
+    let mut indices = counters.keys().into_iter().collect::<Vec<&u32>>();
+    indices.sort(); // return counters sorted ascending by index
 
-    vec![Counter {
-        index: initial_index,
-        value: initial_value,
-    }]
+    let mut result: Vec<Counter> = Vec::new();
+    for index in indices {
+        result.push(Counter {
+            index: *index,
+            value: *counters.get(index).unwrap(),
+        });
+    }
+
+    result
 }
