@@ -1,21 +1,27 @@
-use std::collections::HashMap;
 use std::sync::Mutex;
 
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
+use serde::{Deserialize, Serialize};
 
 struct AppInfo {
     version: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 struct AppState {
-    counters: Mutex<HashMap<i32, i32>>, // Mutex is necessary to mutate safely across threads
+    counter: Mutex<Counter>, // Mutex is necessary to mutate safely across threads
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Counter {
+    index: i32,
+    value: i32,
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let app_state = web::Data::new(AppState {
-        counters: Mutex::new(HashMap::new()),
+        counter: Mutex::new(Counter { index: 0, value: 0 }),
     });
 
     HttpServer::new(move || {
@@ -48,9 +54,12 @@ async fn version(data: web::Data<AppInfo>) -> impl Responder {
 }
 
 #[get("/counters")]
-async fn counters(data: web::Data<AppState>) -> impl Responder {
-    let counters = data.counters.lock().unwrap();
-    format!("Number of counters: {}", counters.len())
+async fn counters(data: web::Data<AppState>) -> Result<HttpResponse> {
+    let counter = data.counter.lock().unwrap();
+    Ok(HttpResponse::Ok().json(Counter {
+        index: counter.index,
+        value: counter.value,
+    }))
 }
 
 // Use of a mod or pub mod is not actually necessary.

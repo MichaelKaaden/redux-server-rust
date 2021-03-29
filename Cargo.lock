@@ -1168,6 +1168,8 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "built",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
