@@ -46,14 +46,14 @@ async fn main() -> std::io::Result<()> {
             .data(AppInfo {
                 version: { format!("v{}", built_info::PKG_VERSION) },
             })
-            .service(version)
-            .service(get_counters)
             .service(
                 // prefixes all resources and routes attached to it...
                 web::scope("/demo")
                     // ...so this handles requests for "GET /app/index.html"
                     .route("/index.html", web::get().to(index)),
             )
+            .service(get_counters)
+            .service(get_version)
     })
     .bind("127.0.0.1:3000")?
     .run()
@@ -65,20 +65,19 @@ async fn index() -> impl Responder {
 }
 
 #[get("/version")]
-async fn version(data: web::Data<AppInfo>) -> impl Responder {
+async fn get_version(data: web::Data<AppInfo>) -> impl Responder {
     data.version.to_string()
 }
 
 #[get("/counters")]
 async fn get_counters(data: web::Data<AppState>) -> Result<HttpResponse> {
-    let counters = redux_server_rust::get_counters(data.counters.lock().unwrap());
-    let counters_dto: CountersDTO = CountersDTO { counters };
-    let foo: JSONResult<CountersDTO> = JSONResult {
-        data: counters_dto,
+    Ok(HttpResponse::Ok().json(JSONResult {
+        data: CountersDTO {
+            counters: redux_server_rust::get_counters(data.counters.lock().unwrap()),
+        },
         message: "okay".to_string(),
         status: 200,
-    };
-    Ok(HttpResponse::Ok().json(foo))
+    }))
 }
 
 // Use of a mod or pub mod is not actually necessary.
