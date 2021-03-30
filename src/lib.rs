@@ -31,3 +31,16 @@ pub fn get_counter(mut counters: MutexGuard<HashMap<u32, i32>>, counter: u32) ->
         value: *value,
     }
 }
+
+pub fn set_counter(
+    mut counters: MutexGuard<HashMap<u32, i32>>,
+    counter: u32,
+    count: i32,
+) -> Counter {
+    let value = counters.entry(counter).or_insert(0);
+    *value = count;
+    Counter {
+        index: counter,
+        value: *value,
+    }
+}

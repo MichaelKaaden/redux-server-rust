@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
+use actix_web::{get, put, web, App, HttpResponse, HttpServer, Responder, Result};
 use serde::{Deserialize, Serialize};
 
 use redux_server_rust::Counter;
@@ -32,6 +32,16 @@ struct JSONResult<T> {
     status: u32,
 }
 
+#[derive(Deserialize)]
+struct JSONBodySet {
+    count: i32,
+}
+
+#[derive(Deserialize)]
+struct JSONBodyChangeBy {
+    by: i32,
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let mut initial_counters = HashMap::new();
@@ -53,6 +63,7 @@ async fn main() -> std::io::Result<()> {
                     .route("/index.html", web::get().to(index)),
             )
             .service(get_counter)
+            .service(set_counter)
             .service(get_counters)
             .service(get_version)
     })
@@ -89,6 +100,25 @@ async fn get_counter(
     Ok(HttpResponse::Ok().json(JSONResult {
         data: CounterDTO {
             counter: redux_server_rust::get_counter(data.counters.lock().unwrap(), counter_id),
+        },
+        message: "okay".to_string(),
+        status: 200,
+    }))
+}
+
+#[put("/counters/{counter_id}")]
+async fn set_counter(
+    data: web::Data<AppState>,
+    web::Path(counter_id): web::Path<u32>,
+    value: web::Json<JSONBodySet>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().json(JSONResult {
+        data: CounterDTO {
+            counter: redux_server_rust::set_counter(
+                data.counters.lock().unwrap(),
+                counter_id,
+                value.count,
+            ),
         },
         message: "okay".to_string(),
         status: 200,
