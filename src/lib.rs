@@ -23,3 +23,11 @@ pub fn get_counters(counters: MutexGuard<HashMap<u32, i32>>) -> Vec<Counter> {
 
     result
 }
+
+pub fn get_counter(mut counters: MutexGuard<HashMap<u32, i32>>, counter: u32) -> Counter {
+    let value = counters.entry(counter).or_insert(0);
+    Counter {
+        index: counter,
+        value: *value,
+    }
+}

@@ -52,6 +52,7 @@ async fn main() -> std::io::Result<()> {
                     // ...so this handles requests for "GET /app/index.html"
                     .route("/index.html", web::get().to(index)),
             )
+            .service(get_counter)
             .service(get_counters)
             .service(get_version)
     })
@@ -74,6 +75,20 @@ async fn get_counters(data: web::Data<AppState>) -> Result<HttpResponse> {
     Ok(HttpResponse::Ok().json(JSONResult {
         data: CountersDTO {
             counters: redux_server_rust::get_counters(data.counters.lock().unwrap()),
+        },
+        message: "okay".to_string(),
+        status: 200,
+    }))
+}
+
+#[get("/counters/{counter_id}")]
+async fn get_counter(
+    data: web::Data<AppState>,
+    web::Path(counter_id): web::Path<u32>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().json(JSONResult {
+        data: CounterDTO {
+            counter: redux_server_rust::get_counter(data.counters.lock().unwrap(), counter_id),
         },
         message: "okay".to_string(),
         status: 200,
