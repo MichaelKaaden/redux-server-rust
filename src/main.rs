@@ -77,9 +77,11 @@ async fn main() -> std::io::Result<()> {
                     .route("/index.html", web::get().to(index)),
             )
             .service(get_counter)
-            .service(set_counter)
             .service(get_counters)
             .service(get_version)
+            .service(decrement)
+            .service(increment)
+            .service(set_counter)
     })
     .bind("127.0.0.1:3000")?
     .run()
@@ -132,6 +134,44 @@ async fn set_counter(
                 data.counters.lock().unwrap(),
                 counter_id,
                 value.count,
+            ),
+        },
+        message: "okay".to_string(),
+        status: 200,
+    }))
+}
+
+#[put("/counters/{counter_id}/decrement")]
+async fn decrement(
+    data: web::Data<AppState>,
+    web::Path(counter_id): web::Path<u32>,
+    value: web::Json<JsonBodyChangeBy>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().json(JsonResult {
+        data: CounterDto {
+            counter: redux_server_rust::decrement_counter(
+                data.counters.lock().unwrap(),
+                counter_id,
+                value.by,
+            ),
+        },
+        message: "okay".to_string(),
+        status: 200,
+    }))
+}
+
+#[put("/counters/{counter_id}/increment")]
+async fn increment(
+    data: web::Data<AppState>,
+    web::Path(counter_id): web::Path<u32>,
+    value: web::Json<JsonBodyChangeBy>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().json(JsonResult {
+        data: CounterDto {
+            counter: redux_server_rust::increment_counter(
+                data.counters.lock().unwrap(),
+                counter_id,
+                value.by,
             ),
         },
         message: "okay".to_string(),

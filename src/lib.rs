@@ -44,3 +44,29 @@ pub fn set_counter(
         value: *value,
     }
 }
+
+pub fn decrement_counter(
+    mut counters: MutexGuard<HashMap<u32, i32>>,
+    counter: u32,
+    decrement: i32,
+) -> Counter {
+    let value = counters.entry(counter).or_insert(0);
+    *value -= decrement;
+    Counter {
+        index: counter,
+        value: *value,
+    }
+}
+
+pub fn increment_counter(
+    mut counters: MutexGuard<HashMap<u32, i32>>,
+    counter: u32,
+    decrement: i32,
+) -> Counter {
+    let value = counters.entry(counter).or_insert(0);
+    *value += decrement;
+    Counter {
+        index: counter,
+        value: *value,
+    }
+}
