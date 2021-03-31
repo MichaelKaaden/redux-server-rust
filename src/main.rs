@@ -52,7 +52,21 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            // shared app state
             .app_data(app_state.clone())
+            // limit the payload size to 1_024 bytes and log errors
+            .app_data(
+                web::JsonConfig::default()
+                    .limit(1024)
+                    .error_handler(|err, req| {
+                        println!("err: {:?}", err);
+                        println!("req: {:#?}", req);
+                        // produce your own error, here: Conflict
+                        //error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+                        //    .into()
+                        err.into()
+                    }),
+            )
             .data(AppInfo {
                 version: { format!("v{}", built_info::PKG_VERSION) },
             })
