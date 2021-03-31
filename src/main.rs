@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-use actix_web::{get, put, web, App, HttpResponse, HttpServer, Responder, Result};
+use actix_cors::Cors;
+use actix_web::{get, http, put, web, App, HttpResponse, HttpServer, Responder, Result};
 use serde::{Deserialize, Serialize};
 
 use redux_server_rust::Counter;
@@ -63,7 +64,15 @@ async fn main() -> std::io::Result<()> {
                 err.into()
             });
 
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:4200")
+            .allowed_methods(vec!["GET", "HEADER", "OPTIONS", "PUT"])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600);
+
         App::new()
+            // handle CORS
+            .wrap(cors)
             // shared app state
             .app_data(app_state.clone())
             .app_data(json_config)
