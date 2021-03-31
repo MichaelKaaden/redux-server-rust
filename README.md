@@ -2,10 +2,6 @@
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/MichaelKaaden/redux-server-rust.svg)](https://github.com/MichaelKaaden/redux-server-rust/commits/master)
 [![GitHub tag](https://img.shields.io/github/tag/MichaelKaaden/redux-server-rust.svg)](https://github.com/MichaelKaaden/redux-server-rust/releases)
-[![GitHub version](https://img.shields.io/github/package-json/v/MichaelKaaden/redux-server-rust.svg)](https://github.com/MichaelKaaden/redux-server-rust/blob/master/package.json)
-[![Build Status](https://travis-ci.com/MichaelKaaden/redux-server-rust.svg?branch=master)](https://travis-ci.com/MichaelKaaden/redux-server-rust)
-[![dependencies](https://img.shields.io/david/MichaelKaaden/redux-server-rust.svg)](https://david-dm.org/MichaelKaaden/redux-server-rust)
-[![devDependencies](https://img.shields.io/david/dev/MichaelKaaden/redux-server-rust.svg)](https://david-dm.org/MichaelKaaden/redux-server-rust?type=dev)
 [![GitHub issues](https://img.shields.io/github/issues/MichaelKaaden/redux-server-rust.svg)](https://github.com/MichaelKaaden/redux-server-rust/issues)
 [![license](https://img.shields.io/github/license/MichaelKaaden/redux-server-rust.svg)](https://github.com/MichaelKaaden/redux-server-rust)
 
