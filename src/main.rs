@@ -16,29 +16,29 @@ struct AppState {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CounterDTO {
+struct CounterDto {
     counter: Counter,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CountersDTO {
+struct CountersDto {
     counters: Vec<Counter>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct JSONResult<T> {
+struct JsonResult<T> {
     data: T,
     message: String,
     status: u32,
 }
 
 #[derive(Deserialize)]
-struct JSONBodySet {
+struct JsonBodySet {
     count: i32,
 }
 
 #[derive(Deserialize)]
-struct JSONBodyChangeBy {
+struct JsonBodyChangeBy {
     by: i32,
 }
 
@@ -97,8 +97,8 @@ async fn get_version(data: web::Data<AppInfo>) -> impl Responder {
 
 #[get("/counters")]
 async fn get_counters(data: web::Data<AppState>) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json(JSONResult {
-        data: CountersDTO {
+    Ok(HttpResponse::Ok().json(JsonResult {
+        data: CountersDto {
             counters: redux_server_rust::get_counters(data.counters.lock().unwrap()),
         },
         message: "okay".to_string(),
@@ -111,8 +111,8 @@ async fn get_counter(
     data: web::Data<AppState>,
     web::Path(counter_id): web::Path<u32>,
 ) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json(JSONResult {
-        data: CounterDTO {
+    Ok(HttpResponse::Ok().json(JsonResult {
+        data: CounterDto {
             counter: redux_server_rust::get_counter(data.counters.lock().unwrap(), counter_id),
         },
         message: "okay".to_string(),
@@ -124,10 +124,10 @@ async fn get_counter(
 async fn set_counter(
     data: web::Data<AppState>,
     web::Path(counter_id): web::Path<u32>,
-    value: web::Json<JSONBodySet>,
+    value: web::Json<JsonBodySet>,
 ) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json(JSONResult {
-        data: CounterDTO {
+    Ok(HttpResponse::Ok().json(JsonResult {
+        data: CounterDto {
             counter: redux_server_rust::set_counter(
                 data.counters.lock().unwrap(),
                 counter_id,
