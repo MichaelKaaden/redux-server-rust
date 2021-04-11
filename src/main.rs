@@ -92,7 +92,8 @@ async fn main() -> std::io::Result<()> {
             .service(increment)
             .service(set_counter)
     })
-    .bind("127.0.0.1:3000")?
+    //.bind("127.0.0.1:3000")?
+    .bind("0.0.0.0:3000")?
     .run()
     .await
 }
