@@ -27,6 +27,15 @@ You should have a working Rust installation on your computer. Then, the server w
 $ cargo run
 ```
 
+## Building the Docker Image
+
+To build and run a Docker image, use 
+
+```shell
+$ docker build -t redux-server-rust .
+$ docker run -p 3000:3000 --rm redux-server-rust
+```
+
 ## Alternative and Corresponding Implementations
 
 This is only one possible solution to this kind of problem.
