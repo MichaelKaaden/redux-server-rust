@@ -29,12 +29,18 @@ $ cargo run
 
 ## Building the Docker Image
 
-To build and run a Docker image, use 
+The `Dockerfile` in this repository uses a multi-stage build to produce the image containing the binary. To build an
+image as small as possible, I chose to build statically against [MUSL](https://en.wikipedia.org/wiki/Musl) and use
+an `alpine` image for the runner stage (resulting in an image with about 25 MB).
+
+To build and run the Docker image, use
 
 ```shell
 $ docker build -t redux-server-rust .
-$ docker run -p 3000:3000 --rm redux-server-rust
+$ docker run -p 3000:3000 --rm -d redux-server-rust
 ```
+
+The service will now listen on your host's port 3000. 
 
 ## Alternative and Corresponding Implementations
 
