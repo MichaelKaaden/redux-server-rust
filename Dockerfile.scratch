@@ -25,13 +25,13 @@ RUN rm -f ./target/release/deps/redux-server-rust*
 # now build the application for release
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
-#FROM debian:buster-slim
-FROM alpine:latest
 ENV APP_USER=appuser
-#RUN useradd -u 10001 ${APP_USER}
-RUN adduser -u 10001 -DH ${APP_USER}
+RUN useradd -u 10001 ${APP_USER}
+RUN chown -R ${APP_USER} /usr/src/redux-server-rust/target/x86_64-unknown-linux-musl/release/redux-server-rust
+
+FROM scratch
 EXPOSE 3000
+COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /usr/src/redux-server-rust/target/x86_64-unknown-linux-musl/release/redux-server-rust /usr/local/bin/redux-server-rust
-RUN chown ${APP_USER} /usr/local/bin/redux-server-rust
 USER ${APP_USER}
 CMD ["/usr/local/bin/redux-server-rust"]
