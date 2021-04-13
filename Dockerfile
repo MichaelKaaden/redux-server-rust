@@ -28,10 +28,10 @@ RUN cargo build --release --target x86_64-unknown-linux-musl
 #FROM debian:buster-slim
 FROM alpine:latest
 ENV APP_USER=appuser
-#RUN useradd -ms /bin/bash ${APP_USER}
-RUN adduser -S ${APP_USER}
+#RUN useradd -u 10001 ${APP_USER}
+RUN adduser -u 10001 -DH ${APP_USER}
 EXPOSE 3000
 COPY --from=builder /usr/src/redux-server-rust/target/x86_64-unknown-linux-musl/release/redux-server-rust /usr/local/bin/redux-server-rust
-RUN chown -R ${APP_USER} /usr/local/bin/redux-server-rust
+RUN chown ${APP_USER} /usr/local/bin/redux-server-rust
 USER ${APP_USER}
-CMD ["redux-server-rust"]
+CMD ["/usr/local/bin/redux-server-rust"]
