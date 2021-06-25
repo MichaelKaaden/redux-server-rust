@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use actix_cors::Cors;
+use actix_web::http::StatusCode;
 use actix_web::{get, http, put, web, App, HttpResponse, HttpServer, Responder, Result};
 use serde::{Deserialize, Serialize};
 
@@ -79,12 +80,7 @@ async fn main() -> std::io::Result<()> {
             .data(AppInfo {
                 version: { format!("v{}", built_info::PKG_VERSION) },
             })
-            .service(
-                // prefixes all resources and routes attached to it...
-                web::scope("/demo")
-                    // ...so this handles requests for "GET /app/index.html"
-                    .route("/index.html", web::get().to(index)),
-            )
+            .service(index)
             .service(get_counter)
             .service(get_counters)
             .service(get_version)
@@ -98,8 +94,11 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn index() -> impl Responder {
-    "Hello world"
+#[get("/")]
+async fn index() -> Result<HttpResponse> {
+    Ok(HttpResponse::build(StatusCode::OK)
+        .content_type("text/html; charset=utf-8")
+        .body(include_str!("../static/index.html")))
 }
 
 #[get("/version")]
